@@ -1,0 +1,134 @@
+name: Swift
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Print env to logs and summary
+      - name: Show build environment
+        run: |
+          echo "=== macOS version ==="
+          sw_vers
+          echo
+
+          echo "=== Xcode ==="
+          xcodebuild -version
+          echo
+
+          echo "=== Swift ==="
+          swift --version
+          echo
+
+          echo "=== Available SDKs ==="
+          xcodebuild -showsdks
+          echo
+
+          echo "=== Environment variables ==="
+          env | sort
+
+          {
+            echo "## Build Environment"
+            echo
+            echo "### macOS"
+            sw_vers
+            echo
+            echo "### Xcode"
+            xcodebuild -version
+            echo
+            echo "### Swift"
+            swift --version
+            echo
+            echo "### Available SDKs"
+            xcodebuild -showsdks
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build
+        run: swift build -v
+
+      # List tests in both logs and summary
+      - name: List tests
+        run: |
+          swift test --list-tests
+
+          echo "## Test List" >> "$GITHUB_STEP_SUMMARY"
+          swift test --list-tests >> "$GITHUB_STEP_SUMMARY"
+
+      # Run tests with coverage enabled
+      - name: Run tests with coverage
+        run: swift test --enable-code-coverage -v
+
+      # Generate and show coverage report
+      - name: Generate coverage report
+        run: |
+          # Merge raw coverage data into a .profdata file
+          mkdir -p .build/debug/codecov
+          xcrun llvm-profdata merge -sparse .build/debug/codecov/*.profraw \
+            -o .build/debug/codecov/coverage.profdata
+
+          # Find the test bundle produced by SwiftPM
+          TEST_BUNDLE=$(find .build -name "*PackageTests.xctest" -type d | head -n 1)
+          if [ -z "$TEST_BUNDLE" ]; then
+            echo "Could not find *PackageTests.xctest bundle"
+            exit 1
+          fi
+
+          TEST_BASENAME=$(basename "$TEST_BUNDLE" .xctest)
+          TEST_BINARY="$TEST_BUNDLE/Contents/MacOS/$TEST_BASENAME"
+
+          if [ ! -f "$TEST_BINARY" ]; then
+            echo "Could not find test binary at $TEST_BINARY"
+            exit 1
+          fi
+
+          # Generate human-readable coverage report
+          xcrun llvm-cov report \
+            "$TEST_BINARY" \
+            -instr-profile=.build/debug/codecov/coverage.profdata \
+            > coverage.txt
+
+          echo "=== Coverage summary ==="
+          cat coverage.txt
+
+          # Extract TOTAL line
+          TOTAL_LINE=$(grep "^TOTAL" coverage.txt || true)
+          if [ -z "$TOTAL_LINE" ]; then
+            echo "Could not find TOTAL line in coverage.txt"
+            exit 1
+          fi
+
+          # Columns: TOTAL Regions MissedRegions Region% Funcs MissedFuncs Func% Lines MissedLines Line% Branches MissedBranches Branch%
+          REGION_COVER=$(echo "$TOTAL_LINE" | awk '{print $4}')
+          FUNC_COVER=$(echo "$TOTAL_LINE" | awk '{print $7}')
+          LINE_COVER=$(echo "$TOTAL_LINE" | awk '{print $10}')
+
+          {
+            echo "## Code Coverage"
+            echo
+            echo "| Metric | Coverage |"
+            echo "|--------|----------|"
+            echo "| Region Coverage  | $REGION_COVER |"
+            echo "| Function Coverage| $FUNC_COVER |"
+            echo "| Line Coverage    | $LINE_COVER |"
+            echo
+            echo "<details><summary>Full llvm-cov report</summary>"
+            echo
+            echo '```text'
+            cat coverage.txt
+            echo '```'
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
+          
+      # Upload coverage as an artifact to download from the UI
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.txt
