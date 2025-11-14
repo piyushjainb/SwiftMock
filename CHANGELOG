@@ -1,3 +1,9 @@
+6.0.0
+	updated to Swift 6.0
+	enabled strict concurrency checking
+	replaced #file with #filePath for Swift 6 compatibility
+	added minimum platform versions (iOS 13+, macOS 10.15+, tvOS 13+, watchOS 6+)
+
 5.9.0
 	adds code comments
 	support throwing functions

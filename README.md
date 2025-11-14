@@ -3,9 +3,29 @@
 ![](https://img.shields.io/badge/maintained-yes-green.svg)
 ![](https://img.shields.io/github/license/mflint/SwiftMock.svg)
 ![](https://img.shields.io/badge/platform-ios%20|%20osx%20|%20watchos%20|%20tvos-green.svg)
-![](https://img.shields.io/badge/swift_version-5.9-green.svg)
+![](https://img.shields.io/badge/swift_version-6.0-green.svg)
 
-_SwiftMock_ is a mocking framework for Swift 5.9.
+_SwiftMock_ is a mocking framework for Swift 6.0.
+
+## Requirements
+
+**Swift 6.0 or later** is required for this version of SwiftMock.
+
+### Minimum Versions
+- **Xcode**: 16.0+
+- **Swift**: 6.0+
+- **iOS**: 13.0+
+- **macOS**: 10.15+
+- **tvOS**: 13.0+
+- **watchOS**: 6.0+
+
+### Backward Compatibility
+
+⚠️ **This version is NOT backward compatible with Swift 5.x.** 
+
+If you need Swift 5.x support, please use SwiftMock version 5.9.0 or earlier.
+
+This version includes strict concurrency checking and uses Swift 6 language features.
 
 ## Notes on the history of this repo
 
@@ -15,6 +35,7 @@ _SwiftMock_ is a mocking framework for Swift 5.9.
 * May 2020: Minor changes
 * July 2021: Fix crash when setting multiple expectations
 * December 2023: Mocks now have a name, which is reported when an expectation fails
+* November 2025: Updated to Swift 6.0 with strict concurrency enabled
 
 I spent a while using fakes (test-doubles which implement a prototol and simply set various `methodWasCalled` flags), but this doesn't scale well. It's easy to forget to make assertions, especially if a new function is added to a protocol long after the protocol's fake was written. I've since migrated a lot of code to using this new Mock, and it's _amazing_ how many defects I've found. Mocks FTW!
 
