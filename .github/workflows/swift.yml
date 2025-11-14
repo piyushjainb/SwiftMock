@@ -97,20 +97,26 @@ jobs:
           echo "=== Coverage summary ==="
           cat coverage.txt
 
-          # Extract TOTAL line (spaces preserved)
-          TOTAL_LINE=$(grep "^TOTAL" coverage.txt)
+          # Extract TOTAL line
+          TOTAL_LINE=$(grep "^TOTAL" coverage.txt || true)
+          if [ -z "$TOTAL_LINE" ]; then
+            echo "Could not find TOTAL line in coverage.txt"
+            exit 1
+          fi
 
-          # Extract overall line coverage % (5th column in llvm-cov report)
-          # Example TOTAL line structure:
-          # TOTAL 198 17 91.41% 124 4 96.77% ...
-          LINE_COVER=$(echo "$TOTAL_LINE" | awk '{print $5}')
+          # Columns: TOTAL Regions MissedRegions Region% Funcs MissedFuncs Func% Lines MissedLines Line% Branches MissedBranches Branch%
+          REGION_COVER=$(echo "$TOTAL_LINE" | awk '{print $4}')
+          FUNC_COVER=$(echo "$TOTAL_LINE" | awk '{print $7}')
+          LINE_COVER=$(echo "$TOTAL_LINE" | awk '{print $10}')
 
           {
             echo "## Code Coverage"
             echo
             echo "| Metric | Coverage |"
             echo "|--------|----------|"
-            echo "| Line Coverage | $LINE_COVER |"
+            echo "| Region Coverage  | $REGION_COVER |"
+            echo "| Function Coverage| $FUNC_COVER |"
+            echo "| Line Coverage    | $LINE_COVER |"
             echo
             echo "<details><summary>Full llvm-cov report</summary>"
             echo
