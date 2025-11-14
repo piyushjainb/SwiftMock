@@ -1,10 +1,16 @@
-// swift-tools-version:5.3
+// swift-tools-version:6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "SwiftMock",
+    platforms: [
+        .iOS(.v13),
+        .macOS(.v10_15),
+        .tvOS(.v13),
+        .watchOS(.v6)
+    ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -20,9 +26,15 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "SwiftMock",
-            dependencies: []),
+            dependencies: [],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency")
+            ]),
         .testTarget(
             name: "SwiftMockTests",
-            dependencies: ["SwiftMock"]),
+            dependencies: ["SwiftMock"],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency")
+            ]),
     ]
 )

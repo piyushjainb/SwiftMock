@@ -341,7 +341,7 @@ open class Mock<M> {
 	/// - Parameters:
 	///   - file: Calling file.
 	///   - line: Calling line.
-	public func verify(file: StaticString = #file, line: UInt = #line) {
+	public func verify(file: StaticString = #filePath, line: UInt = #line) {
 		guard let expectationConsumer = expectationHandler as? MockExpectationConsumer else {
 			preconditionFailure("internal error")
 		}
@@ -372,7 +372,7 @@ open class Mock<M> {
 	///   - line: Calling line.
 	/// - Returns: The optional return value for the mocked function.
 	@discardableResult
-	public func accept(func: String = #function, args: [Any?] = [], file: StaticString = #file, line: UInt = #line) -> Any? {
+	public func accept(func: String = #function, args: [Any?] = [], file: StaticString = #filePath, line: UInt = #line) -> Any? {
 		return accept(func: `func`, checkArgs: args, actionArgs: args, file: file, line: line)
 	}
 	
@@ -387,7 +387,7 @@ open class Mock<M> {
 	///   - file: Calling file.
 	///   - line: Calling line.
 	/// - Returns: The optional return value for the mocked function.
-	public func accept(func: String = #function, checkArgs: [Any?], actionArgs: [Any?], file: StaticString = #file, line: UInt = #line) -> Any? {
+	public func accept(func: String = #function, checkArgs: [Any?], actionArgs: [Any?], file: StaticString = #filePath, line: UInt = #line) -> Any? {
 		var callSummary = "\(`func`)"
 		if checkArgs.count > 0 {
 			callSummary += " " + summary(for: checkArgs)
@@ -405,7 +405,7 @@ open class Mock<M> {
 	///   - line: Calling line.
 	/// - Returns: The optional return value for the mocked function.
 	@discardableResult
-	public func throwingAccept(func: String = #function, args: [Any?] = [], file: StaticString = #file, line: UInt = #line) throws -> Any? {
+	public func throwingAccept(func: String = #function, args: [Any?] = [], file: StaticString = #filePath, line: UInt = #line) throws -> Any? {
 		return try throwingAccept(func: `func`, checkArgs: args, actionArgs: args, file: file, line: line)
 	}
 
@@ -421,7 +421,7 @@ open class Mock<M> {
 	///   - line: Calling line.
 	/// - Returns: The optional return value for the mocked function.
 	/// - Throws: May throw errors when the expecations are being consumed. Will not throw when expectations are being set.
-	public func throwingAccept(func: String = #function, checkArgs: [Any?], actionArgs: [Any?], file: StaticString = #file, line: UInt = #line) throws -> Any? {
+	public func throwingAccept(func: String = #function, checkArgs: [Any?], actionArgs: [Any?], file: StaticString = #filePath, line: UInt = #line) throws -> Any? {
 		var callSummary = "\(`func`)"
 		if checkArgs.count > 0 {
 			callSummary += " " + summary(for: checkArgs)
